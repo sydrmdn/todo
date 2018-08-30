@@ -15,6 +15,7 @@
       <TodoItemFilter></TodoItemFilter>
       <TodoItemClear></TodoItemClear>
     </div>
+    <a class="btn btn-pink" href=""></a>
   </div>
 </template>
 
@@ -40,6 +41,9 @@ export default {
       oldTitle: ''
     }
   },
+  created () {
+    this.$store.dispatch('retrieveTodos')
+  },
   computed: {
     anyRemaining () {
       return this.$store.getters.anyRemaining
@@ -53,7 +57,7 @@ export default {
       if (this.newTodo.trim().length === 0) {
         return
       }
-      this.$store.commit('addTodo', {
+      this.$store.dispatch('addTodo', {
         id: this.idForTodo,
         title: this.newTodo
       })
@@ -182,33 +186,63 @@ export default {
     cursor: pointer;
   }
 }
-.button{
-  border: none;
-  padding: 5px 10px 5px 10px;
-  background: #7185ec;
-  color: #fff;
-  border-radius: 4px;
+// .button{
+//   border: none;
+//   padding: 5px 10px 5px 10px;
+//   background: #7185ec;
+//   color: #fff;
+//   border-radius: 4px;
+//   cursor: pointer;
+//   text-align: center;
+//   font-weight: bold;
+//   box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.2);
+//   outline: 0;
+//   &:hover{
+//     background-color: #586cd8;
+//   }
+//   &:active{
+//     position: relative;
+//     top: 1px;
+//     left: 1px;
+//     box-shadow: none;
+//   }
+// }
+// .button.active {
+//   position: relative;
+//   top: 1px;
+//   left: 1px;
+//   -webkit-box-shadow: none;
+//   box-shadow: none;
+//   background-color: #586cd8;
+// }
+.button {
+  display: inline-block;
   cursor: pointer;
-  text-align: center;
-  font-weight: bold;
-  box-shadow: 1px 1px 3px 0px rgba(0, 0, 0, 0.2);
-  outline: 0;
-  &:hover{
-    background-color: #586cd8;
-  }
-  &:active{
-    position: relative;
-    top: 1px;
-    left: 1px;
-    box-shadow: none;
-  }
+  border-radius: 4px;
+  font-weight: 600;
+  padding: .30em .70em;
+  transition: none;
+  margin: .25em 0;
+  position: relative
 }
-.button.active {
-  position: relative;
-  top: 1px;
-  left: 1px;
-  -webkit-box-shadow: none;
-  box-shadow: none;
-  background-color: #586cd8;
+.button:not(:first-child) {
+    margin-left: .50em
+}
+.button-pink {
+    background-color: #ff5a79;
+    color: #fff;
+    box-shadow: 0 4px #f3002e
+}
+.button-pink:hover {
+    top: 2px;
+    box-shadow: 0 2px #f3002e
+}
+.button-pink:active {
+    box-shadow: 0 0 #ff5a79;
+    top: 4px
+}
+.button-pink.active {
+    top: 2px;
+    box-shadow: 0 2px #f3002e
 }
 </style>

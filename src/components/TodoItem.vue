@@ -2,14 +2,14 @@
   <div class="todo-item">
     <div class="todo-item-left">
       <div>
-        <input class="checkbox" type="checkbox" v-model="completed" v-on:change="doneEdit">
+        <input class="checkbox" type="checkbox" v-model="completed" v-on:change="updateTodo">
       </div>
       <div class="todo-item-label" v-if="!editing" v-on:dblclick="editTodo" v-bind:class="{ completed : completed }">{{ title }}</div>
-      <input type="text" class="todo-item-edit" v-model="title" v-else v-on:blur="doneEdit" v-on:keyup.enter="doneEdit" v-on:keyup.esc="cancelEdit" v-focus>
+      <input type="text" class="todo-item-edit" v-model="title" v-else v-on:blur="updateTodo" v-on:keyup.enter="updateTodo" v-on:keyup.esc="cancelEdit" v-focus>
     </div>
     <div class="todo-item-right">
-      <button class="button" style="" v-on:click="pluralize">Pluralize</button>
-      <span class="remove-item" v-on:click="removeTodo(todo.id)">
+      <a class="button button-pink" style="" v-on:click="pluralize">Pluralize</a>
+      <span class="remove-item" v-on:click="deleteTodo(todo.id)">
         &times;
       </span>
     </div>
@@ -51,19 +51,19 @@ export default {
     }
   },
   methods: {
-    removeTodo (id) {
-      this.$store.dispatch('removeTodo', id)
+    deleteTodo (id) {
+      this.$store.dispatch('deleteTodo', id)
     },
     editTodo () {
       this.oldTitle = this.title
       this.editing = true
     },
-    doneEdit () {
+    updateTodo () {
       if (this.title.trim().length === 0) {
         this.title = this.oldTitle
       }
       this.editing = false
-      this.$store.commit('doneEdit', {
+      this.$store.dispatch('updateTodo', {
         'id': this.id,
         'title': this.title,
         'completed': this.completed,
@@ -79,8 +79,7 @@ export default {
     },
     handlePluralize () {
       this.title = this.title + 's'
-      const index = this.$store.state.todos.findIndex((item) => item.id === this.id)
-      this.$store.state.todos.splice(index, 1, {
+      this.$store.dispatch('updateTodo', {
         'id': this.id,
         'title': this.title,
         'completed': this.completed,

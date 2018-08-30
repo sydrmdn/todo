@@ -1,8 +1,7 @@
-
 <template>
   <div>
     <transition name="fade">
-      <button class="button" v-if="showClearCompletedButton" v-on:click="clearCompleted">Clear Completed</button>
+      <a class="button button-pink" v-if="showClearCompletedButton" v-on:click="clearCompleted">Clear Completed</a>
     </transition>
   </div>
 </template>
@@ -17,7 +16,7 @@ export default {
   },
   methods: {
     clearCompleted () {
-      this.$store.commit('clearCompleted')
+      this.$store.dispatch('clearCompleted')
     }
   }
 }

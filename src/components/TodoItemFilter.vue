@@ -1,8 +1,8 @@
 <template>
   <div>
-    <button class="button" v-bind:class="{ active : filter == 'all' }" v-on:click="changeFilter('all')">All</button>
-    <button class="button" v-bind:class="{ active : filter == 'active' }" v-on:click="changeFilter('active')">Active</button>
-    <button class="button" v-bind:class="{ active : filter == 'completed' }" v-on:click="changeFilter('completed')">Completed</button>
+    <a class="button button-pink" v-bind:class="{ active : filter == 'all' }" v-on:click="changeFilter('all')">All</a>
+    <a class="button button-pink" v-bind:class="{ active : filter == 'active' }" v-on:click="changeFilter('active')">Active</a>
+    <a class="button button-pink" v-bind:class="{ active : filter == 'completed' }" v-on:click="changeFilter('completed')">Completed</a>
   </div>
 </template>
 

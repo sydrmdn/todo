@@ -3,36 +3,22 @@
     <input type="text" class="todo-input" placeholder="Things need to be done.." v-model="newTodo" v-on:keyup.enter="addTodo">
 
     <div class="top-section">
-      <TodoItemCheckAll :anyRemaining="anyRemaining" :filter="filter"></TodoItemCheckAll>
-      <TodoItemCounter :remainingCount="remainingCount"></TodoItemCounter>
+      <TodoItemCheckAll></TodoItemCheckAll>
+      <TodoItemCounter></TodoItemCounter>
     </div>
 
     <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-      <TodoItem v-for="todo in todosFiltered" v-bind:key="todo.id" v-bind:todo="todo" v-bind:checkAll="!anyRemaining">
-        <!-- <div class="todo-item" v-for="(todo, index) in todosFiltered" v-bind:key="todo.id">
-          <div class="todo-item-left">
-            <div>
-              <input class="checkbox" type="checkbox" v-model="todo.completed">
-            </div>
-            <div class="todo-item-label" v-if="!todo.editing" v-on:dblclick="editTodo(todo)" v-bind:class="{ completed : todo.completed }">{{ todo.title }}</div>
-            <input type="text" class="todo-item-edit" v-model="todo.title" v-else v-on:blur="doneEdit(todo)" v-on:keyup.enter="doneEdit(todo)" v-on:keyup.esc="cancelEdit(todo)" v-focus>
-          </div>
-          <div class="remove-item" v-on:click="removeTodo(index)">
-            &times;
-          </div>
-        </div> -->
-      </TodoItem>
+      <TodoItem v-for="todo in todosFiltered" v-bind:key="todo.id" v-bind:todo="todo" v-bind:checkAll="!anyRemaining"></TodoItem>
     </transition-group>
 
     <div class="bottom-section">
       <TodoItemFilter></TodoItemFilter>
-      <TodoItemClear :showClearCompletedButton="showClearCompletedButton"></TodoItemClear>
+      <TodoItemClear></TodoItemClear>
     </div>
   </div>
 </template>
 
 <script>
-import { EventBus } from '../main'
 import TodoItem from './TodoItem'
 import TodoItemCounter from './TodoItemCounter'
 import TodoItemCheckAll from './TodoItemCheckAll'
@@ -51,63 +37,15 @@ export default {
     return {
       newTodo: '',
       idForTodo: 4,
-      oldTitle: '',
-      filter: 'all',
-      todos: [
-        {
-          id: 1,
-          title: 'Finish Vue todo app part 1',
-          completed: false,
-          editing: false
-        },
-        {
-          id: 2,
-          title: 'Subuh Prayer',
-          completed: false,
-          editing: false
-        },
-        {
-          id: 3,
-          title: 'Makan',
-          completed: false,
-          editing: false
-        }
-      ]
+      oldTitle: ''
     }
   },
-  created () {
-    EventBus.$on('remove-todo', (id) => this.removeTodo(id))
-    EventBus.$on('done-edit', (data) => this.doneEdit(data))
-    EventBus.$on('check-all-todos', (checked) => this.checkAllTodos(checked))
-    EventBus.$on('change-filter', (filter) => (this.filter = filter)) // this update the filter in the parent
-    EventBus.$on('clear-completed', () => this.clearCompleted())
-  },
-  beforeDestroy () {
-    EventBus.$off('remove-todo', (index) => this.removeTodo(index))
-    EventBus.$off('done-edit', (data) => this.doneEdit(data))
-    EventBus.$off('check-all-todos', (checked) => this.checkAllTodos(checked))
-    EventBus.$off('change-filter', (filter) => (this.filter = filter))
-    EventBus.$off('clear-completed', () => this.clearCompleted())
-  },
   computed: {
-    remainingCount () {
-      return this.todos.filter(todo => !todo.completed).length
-    },
     anyRemaining () {
-      return this.remainingCount !== 0
+      return this.$store.getters.anyRemaining
     },
     todosFiltered () {
-      if (this.filter === 'all') {
-        return this.todos
-      } else if (this.filter === 'active') {
-        return this.todos.filter(todo => !todo.completed)
-      } else if (this.filter === 'completed') {
-        return this.todos.filter(todo => todo.completed)
-      }
-      return this.todos
-    },
-    showClearCompletedButton () {
-      return this.todos.filter(todo => todo.completed).length > 0
+      return this.$store.getters.todosFiltered
     }
   },
   methods: {
@@ -115,41 +53,12 @@ export default {
       if (this.newTodo.trim().length === 0) {
         return
       }
-      this.todos.push({
+      this.$store.commit('addTodo', {
         id: this.idForTodo,
-        title: this.newTodo,
-        completed: false
+        title: this.newTodo
       })
       this.newTodo = ''
       this.idForTodo++
-    },
-    removeTodo (id) {
-      const index = this.todos.findIndex((item) => item.id === id)
-      this.todos.splice(index, 1)
-    },
-    // editTodo (todo) {
-    //   this.oldTitle = todo.title
-    //   todo.editing = true
-    // },
-    // doneEdit (todo) {
-    //   if (todo.title.trim().length === 0) {
-    //     todo.title = this.oldTitle
-    //   }
-    //   todo.editing = false
-    // },
-    // cancelEdit (todo) {
-    //   todo.title = this.oldTitle
-    //   todo.editing = false
-    // },
-    checkAllTodos () {
-      this.todos.forEach((todo) => (todo.completed = event.target.checked))
-    },
-    clearCompleted () {
-      this.todos = this.todos.filter(todo => !todo.completed)
-    },
-    doneEdit (data) {
-      const index = this.todos.findIndex((item) => item.id === data.id)
-      this.todos.splice(index, 1, data)
     }
   }
 }

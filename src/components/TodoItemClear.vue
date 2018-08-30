@@ -1,3 +1,4 @@
+
 <template>
   <div>
     <transition name="fade">
@@ -7,18 +8,16 @@
 </template>
 
 <script>
-import { EventBus } from '../main'
 export default {
   name: 'TodoItemClear',
-  props: {
-    showClearCompletedButton: {
-      type: Boolean,
-      required: true
+  computed: {
+    showClearCompletedButton () {
+      return this.$store.getters.showClearCompletedButton
     }
   },
   methods: {
     clearCompleted () {
-      EventBus.$emit('clear-completed')
+      this.$store.commit('clearCompleted')
     }
   }
 }

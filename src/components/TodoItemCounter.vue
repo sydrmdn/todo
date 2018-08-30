@@ -7,10 +7,9 @@
 <script>
 export default {
   name: 'TodoItemCounter',
-  props: {
-    remainingCount: {
-      type: Number,
-      required: true
+  computed: {
+    remainingCount () {
+      return this.$store.getters.remainingCount
     }
   }
 }

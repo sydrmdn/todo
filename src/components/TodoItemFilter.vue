@@ -7,18 +7,16 @@
 </template>
 
 <script>
-import { EventBus } from '../main'
 export default {
   name: 'TodoItemFilter',
-  data () {
-    return {
-      'filter': 'all'
+  computed: {
+    filter () {
+      return this.$store.state.filter
     }
   },
   methods: {
     changeFilter (filter) {
-      this.filter = filter
-      EventBus.$emit('change-filter', filter)
+      this.$store.commit('changeFilter', filter)
     }
   }
 }

@@ -3,47 +3,50 @@
     <input type="text" class="todo-input" placeholder="Things need to be done.." v-model="newTodo" v-on:keyup.enter="addTodo">
 
     <div class="top-section">
-      <div>
-        <label><input type="checkbox" class="checkbox" v-bind:checked="!anyRemaining" v-on:change="checkAllTodos" v-if="filter == 'all'"></label>
-      </div>
-      <div>
-        <button class="button">{{ remainingCount }} active item</button>
-      </div>
+      <TodoItemCheckAll :anyRemaining="anyRemaining" :filter="filter"></TodoItemCheckAll>
+      <TodoItemCounter :remainingCount="remainingCount"></TodoItemCounter>
     </div>
 
     <transition-group name="fade" enter-active-class="animated fadeInUp" leave-active-class="animated fadeOutDown">
-      <div class="todo-item" v-for="(todo, index) in todosFiltered" v-bind:key="todo.id">
-        <div class="todo-item-left">
-          <div>
-            <input class="checkbox" type="checkbox" v-model="todo.completed">
+      <TodoItem v-for="todo in todosFiltered" v-bind:key="todo.id" v-bind:todo="todo" v-bind:checkAll="!anyRemaining">
+        <!-- <div class="todo-item" v-for="(todo, index) in todosFiltered" v-bind:key="todo.id">
+          <div class="todo-item-left">
+            <div>
+              <input class="checkbox" type="checkbox" v-model="todo.completed">
+            </div>
+            <div class="todo-item-label" v-if="!todo.editing" v-on:dblclick="editTodo(todo)" v-bind:class="{ completed : todo.completed }">{{ todo.title }}</div>
+            <input type="text" class="todo-item-edit" v-model="todo.title" v-else v-on:blur="doneEdit(todo)" v-on:keyup.enter="doneEdit(todo)" v-on:keyup.esc="cancelEdit(todo)" v-focus>
           </div>
-          <div class="todo-item-label" v-if="!todo.editing" v-on:dblclick="editTodo(todo)" v-bind:class="{ completed : todo.completed }">{{ todo.title }}</div>
-          <input type="text" class="todo-item-edit" v-model="todo.title" v-else v-on:blur="doneEdit(todo)" v-on:keyup.enter="doneEdit(todo)" v-on:keyup.esc="cancelEdit(todo)" v-focus>
-        </div>
-        <div class="remove-item" v-on:click="removeTodo(index)">
-          &times;
-        </div>
-      </div>
+          <div class="remove-item" v-on:click="removeTodo(index)">
+            &times;
+          </div>
+        </div> -->
+      </TodoItem>
     </transition-group>
 
     <div class="bottom-section">
-      <div>
-        <button class="button" v-bind:class="{ active : filter == 'all' }" v-on:click="filter = 'all'">All</button>
-        <button class="button" v-bind:class="{ active : filter == 'active' }" v-on:click="filter = 'active'">Active</button>
-        <button class="button" v-bind:class="{ active : filter == 'completed' }" v-on:click="filter = 'completed'">Completed</button>
-      </div>
-      <div>
-        <transition name="fade">
-          <button class="button" v-if="showClearCompletedButton" v-on:click="clearCompleted">Clear Completed</button>
-        </transition>
-      </div>
+      <TodoItemFilter></TodoItemFilter>
+      <TodoItemClear :showClearCompletedButton="showClearCompletedButton"></TodoItemClear>
     </div>
   </div>
 </template>
 
 <script>
+import { EventBus } from '../main'
+import TodoItem from './TodoItem'
+import TodoItemCounter from './TodoItemCounter'
+import TodoItemCheckAll from './TodoItemCheckAll'
+import TodoItemFilter from './TodoItemFilter'
+import TodoItemClear from './TodoItemClear'
 export default {
   name: 'TodoList',
+  components: {
+    TodoItem,
+    TodoItemCounter,
+    TodoItemCheckAll,
+    TodoItemFilter,
+    TodoItemClear
+  },
   data () {
     return {
       newTodo: '',
@@ -72,12 +75,19 @@ export default {
       ]
     }
   },
-  directives: {
-    focus: {
-      inserted: function (el) {
-        el.focus()
-      }
-    }
+  created () {
+    EventBus.$on('remove-todo', (id) => this.removeTodo(id))
+    EventBus.$on('done-edit', (data) => this.doneEdit(data))
+    EventBus.$on('check-all-todos', (checked) => this.checkAllTodos(checked))
+    EventBus.$on('change-filter', (filter) => (this.filter = filter)) // this update the filter in the parent
+    EventBus.$on('clear-completed', () => this.clearCompleted())
+  },
+  beforeDestroy () {
+    EventBus.$off('remove-todo', (index) => this.removeTodo(index))
+    EventBus.$off('done-edit', (data) => this.doneEdit(data))
+    EventBus.$off('check-all-todos', (checked) => this.checkAllTodos(checked))
+    EventBus.$off('change-filter', (filter) => (this.filter = filter))
+    EventBus.$off('clear-completed', () => this.clearCompleted())
   },
   computed: {
     remainingCount () {
@@ -113,28 +123,33 @@ export default {
       this.newTodo = ''
       this.idForTodo++
     },
-    removeTodo (index) {
+    removeTodo (id) {
+      const index = this.todos.findIndex((item) => item.id === id)
       this.todos.splice(index, 1)
     },
-    editTodo (todo) {
-      this.oldTitle = todo.title
-      todo.editing = true
-    },
-    doneEdit (todo) {
-      if (todo.title.trim().length === 0) {
-        todo.title = this.oldTitle
-      }
-      todo.editing = false
-    },
-    cancelEdit (todo) {
-      todo.title = this.oldTitle
-      todo.editing = false
-    },
+    // editTodo (todo) {
+    //   this.oldTitle = todo.title
+    //   todo.editing = true
+    // },
+    // doneEdit (todo) {
+    //   if (todo.title.trim().length === 0) {
+    //     todo.title = this.oldTitle
+    //   }
+    //   todo.editing = false
+    // },
+    // cancelEdit (todo) {
+    //   todo.title = this.oldTitle
+    //   todo.editing = false
+    // },
     checkAllTodos () {
       this.todos.forEach((todo) => (todo.completed = event.target.checked))
     },
     clearCompleted () {
       this.todos = this.todos.filter(todo => !todo.completed)
+    },
+    doneEdit (data) {
+      const index = this.todos.findIndex((item) => item.id === data.id)
+      this.todos.splice(index, 1, data)
     }
   }
 }
@@ -174,6 +189,11 @@ export default {
 .todo-item-left {
   display: flex;
   align-items: center;
+}
+.todo-item-right {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .todo-item-label {
   padding: 10px;

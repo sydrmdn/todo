@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a class="button button-pink">{{ remainingCount }} active item</a>
+    <a class="button button-pink">&rarr; {{ remainingCount }} active item</a>
   </div>
 </template>
 

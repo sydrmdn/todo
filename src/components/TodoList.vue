@@ -223,23 +223,23 @@ export default {
   padding: .30em .70em;
   transition: none;
   margin: .25em 0;
-  position: relative
-}
-.button:not(:first-child) {
-    margin-left: .50em
+  position: relative;
+  &:not(:first-child) {
+    margin-left: .50em;
+  }
 }
 .button-pink {
     background-color: #ff5a79;
     color: #fff;
-    box-shadow: 0 4px #f3002e
-}
-.button-pink:hover {
-    top: 2px;
-    box-shadow: 0 2px #f3002e
-}
-.button-pink:active {
-    box-shadow: 0 0 #ff5a79;
-    top: 4px
+    box-shadow: 0 4px #f3002e;
+    &:hover {
+      top: 2px;
+      box-shadow: 0 2px #f3002e;
+    }
+    &:active {
+      box-shadow: 0 0 #ff5a79;
+      top: 4px;
+    }
 }
 .button-pink.active {
     top: 2px;
